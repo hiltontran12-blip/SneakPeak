@@ -1,63 +1,92 @@
 import {
-  Avatar,
-  Badge,
   Box,
-  Button,
   Container,
-  HStack,
   Heading,
-  Input,
   Text,
   VStack,
+  Input,
+  Button,
+  HStack,
+  Avatar,
+  Badge,
 } from "@chakra-ui/react";
+import type { Tweet } from "./types/Tweet";
+import { useState, useEffect } from "react";
+import { supabase  } from "./utils/supabase";
 
 function App() {
-  const tweets = [
-    {
-      name: "Maya Johnson",
-      username: "@maya_codes",
-      time: "2m",
-      text: "Just got my Vite app running with Chakra UI. The hardest part was realizing components are just fancy building blocks.",
-      likes: 14,
-      replies: 3,
-      tag: "Web Dev",
-    },
-    {
-      name: "Ethan Brooks",
-      username: "@ethanbuilds",
-      time: "12m",
-      text: "Today I learned that a Stack is basically a cleaner way to organize stuff on a page without fighting CSS forever.",
-      likes: 22,
-      replies: 5,
-      tag: "Chakra",
-    },
-    {
-      name: "Ava Smith",
-      username: "@ava_secure",
-      time: "25m",
-      text: "Hardcoding data first actually makes sense. Get the page looking right, then connect real data later.",
-      likes: 31,
-      replies: 8,
-      tag: "Cyber 301",
-    },
-  ];
+  // Tweets is the curent list of tweets shown
+  //set Tweets is how React updates whats shown
+  // We start with tweets from our json file
+  // we start with no tweets 
+  const [tweets, setTweets] = useState<Tweet[]>([])
+  useEffect(() => {
+  async function load() {
+    const { data, error } = await supabase
+      .from("tweets")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) console.error(error);
+    else setTweets(data || []);
+  }
+
+  load();
+}, []);
+  
+  // input is what is currently typed in the box
+  // setInput is how React knows about newly typed data
+  const [input, setInput] = useState("");
+
+  // this function runs when we click the yap button
+  const handleYapClick = () => {
+    // If input is empty or only white spaces, stop
+    if (!input.trim()) return;
+    const newTweet: Tweet ={
+      id: Date.now(),
+      name: "JoeSmoe",
+      username: "@you",
+      creatdAt: new Date().toISOString(),
+      text: input.trim(),
+      likes: 0,
+      replies: 0,
+      tag: ""
+    }
+    setTweets([newTweet, ...tweets]);
+    // clear input box for new tweets
+    setInput("")
+  }
+
+  // Save the current time once during this render.
+  const currentTime = new Date().toISOString();
+
+  // Helper function that turns a date into "now", "2m", "3h", or "2d".
+  const timeAgo = (iso?: string) => {
+    if (!iso) return "now";
+    const diff = new Date(currentTime).getTime() - new Date(iso).getTime();
+    const sec = Math.floor(diff / 1000);
+    if (sec < 60) return "now";
+    const min = Math.floor(sec / 60);
+    if (min < 60) return `${min}m`;
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return `${hr}h`;
+    const day = Math.floor(hr / 24);
+    return `${day}d`;
+  };
 
   return (
-    <Box bg="gray.900" minH="100vh" py={8}>
+    <Box bg="green.800" minH="100vh" py={8}>
       <Container maxW="650px">
         <VStack gap={5} align="stretch">
-
-          {/* Header Card */}
           <Box bg="gray.800" p={6} borderRadius="2xl" boxShadow="md">
-            <Heading size="lg" color="white">
-              Yapper
+            <Heading size="lg" color="white">]\\[]\[][``]
+              Sneak-Peak
             </Heading>
             <Text color="gray.400" mt={2}>
               A simple Twitter clone built with Vite and Chakra UI.
             </Text>
           </Box>
 
-          {/* Create Post Card */}
           <Box bg="gray.800" p={5} borderRadius="2xl" boxShadow="md">
             <VStack gap={3} align="stretch">
               <Text fontWeight="bold" color="white">
@@ -68,14 +97,19 @@ function App() {
                 bg="gray.700"
                 borderColor="gray.600"
                 color="white"
+                value = {input}
+                // every time user types, we update
+                onChange = {(userInput) => setInput(userInput.target.value)}
               />
-              <Button colorScheme="twitter" alignSelf="flex-end">
+              <Button colorScheme="twitter" alignSelf="flex-end"
+                //when clicked, run handleyap 
+                onClick = {handleYapClick}
+              >
                 Yap
               </Button>
             </VStack>
           </Box>
 
-          {/* Tweet Cards */}
           {tweets.map((tweet, index) => (
             <Box
               key={index}
@@ -101,7 +135,7 @@ function App() {
                         <Badge colorScheme="twitter">{tweet.tag}</Badge>
                       </HStack>
                       <Text color="gray.400" fontSize="sm">
-                        {tweet.username} · {tweet.time}
+                        {tweet.username} · {timeAgo(tweet.createdAt)}
                       </Text>
                     </Box>
                   </HStack>
@@ -117,7 +151,6 @@ function App() {
               </HStack>
             </Box>
           ))}
-
         </VStack>
       </Container>
     </Box>
