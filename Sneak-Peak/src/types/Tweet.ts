@@ -2,7 +2,7 @@ export type Tweet = {
     id?: number;
     name?: string;
     username?: string;
-    creatdAt?: string;
+    createdAt?: string;
     text: string;
     likes?: number;
     replies?: number;

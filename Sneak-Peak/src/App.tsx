@@ -46,7 +46,7 @@ function App() {
       id: Date.now(),
       name: "JoeSmoe",
       username: "@you",
-      creatdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       text: input.trim(),
       likes: 0,
       replies: 0,
